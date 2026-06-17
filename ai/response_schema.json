@@ -1,0 +1,91 @@
+{
+  "type": "object",
+  "description": "위스키 병 이미지 분석 결과. Alcohol 엔티티에 매칭하기 위한 추출+보정+판단 결과",
+  "additionalProperties": false,
+  "required": [
+    "is_whisky",
+    "label_legible",
+    "visible_text_raw",
+    "eng_name",
+    "kor_name",
+    "type",
+    "category_group",
+    "abv",
+    "age",
+    "cask",
+    "volume_ml",
+    "country",
+    "distillery",
+    "identification_reason",
+    "identification",
+    "description"
+  ],
+  "properties": {
+    "is_whisky": {
+      "type": "boolean",
+      "description": "이미지가 주류 병으로 판단되는지 (아니면 false, 식별 필드는 null)"
+    },
+    "label_legible": {
+      "type": "boolean",
+      "description": "라벨 텍스트를 읽을 수 있을 만큼 선명한지"
+    },
+    "visible_text_raw": {
+      "type": "string",
+      "description": "라벨에서 읽어낸 원문 텍스트 그대로. 보정 금지 — 보정/판단의 근거가 되는 ground truth"
+    },
+    "eng_name": {
+      "type": ["string", "null"],
+      "description": "제품 영문명 (Alcohol.engName 대응). 라벨 기준, 표준 표기로 정규화. 미상이면 null"
+    },
+    "kor_name": {
+      "type": ["string", "null"],
+      "description": "제품 한글명 (Alcohol.korName 대응). 식별된 제품의 알려진 한글명으로 보정. 미상이면 null"
+    },
+    "type": {
+      "type": "string",
+      "description": "주류 종류 (AlcoholType enum). 불확실하면 ETC",
+      "enum": ["WHISKY", "RUM", "VODKA", "GIN", "TEQUILA", "BRANDY", "BEER", "WINE", "ETC"]
+    },
+    "category_group": {
+      "type": ["string", "null"],
+      "description": "위스키 하위 분류 (AlcoholCategoryGroup enum). 위스키가 아니거나 미상이면 null",
+      "enum": ["SINGLE_MALT", "BLEND", "BLENDED_MALT", "BOURBON", "RYE", "OTHER", null]
+    },
+    "abv": {
+      "type": ["number", "null"],
+      "description": "알코올 도수(%). 라벨에 없어도 식별된 제품 공식 사양으로 보정. 불확실하면 null"
+    },
+    "age": {
+      "type": ["integer", "null"],
+      "description": "숙성 연수(년). 라벨에 없어도 식별된 제품 사양으로 보정. NAS거나 불확실하면 null"
+    },
+    "cask": {
+      "type": ["string", "null"],
+      "description": "캐스크/숙성통 종류 (Alcohol.cask 대응). 식별된 제품 기준 보정 가능. 미상이면 null"
+    },
+    "volume_ml": {
+      "type": ["integer", "null"],
+      "description": "용량(ml) (Alcohol.volume 대응). 보정 가능. 불확실하면 null"
+    },
+    "country": {
+      "type": ["string", "null"],
+      "description": "생산 국가 영문명 (Region.engName 대응). 식별된 제품 기준 보정. 미상이면 null"
+    },
+    "distillery": {
+      "type": ["string", "null"],
+      "description": "증류소 영문명 (Distillery.engName 대응). 식별된 제품 기준 보정. 미상이면 null"
+    },
+    "identification_reason": {
+      "type": "string",
+      "description": "identification으로 그렇게 식별한 사유. 어떤 단서(라벨의 이름·색·캐스크 표기 등)로 판단했는지 서술. 사진에 병이 여러 개면 어떤 병에 집중했는지와 그 이유도 포함. identification보다 먼저 채워 근거를 쌓는다"
+    },
+    "identification": {
+      "type": "string",
+      "description": "이 사진의 위스키가 무엇인지 식별 결론을 한 문장으로 (예: '이 위스키는 GlenAllachie 17 미즈나라 캐스크이다'). 식별 불가면 '식별 불가'와 그 취지"
+    },
+    "description": {
+      "type": "string",
+      "description": "이 위스키에 대한 설명 (Alcohol.description 대응). 특징, 맛/향 프로파일, 배경 등"
+    }
+  }
+}

@@ -1,0 +1,50 @@
+# 환경 변수 / 시크릿
+/.env
+.env.*
+!.env.example
+
+# 리소스 (대용량/개인 데이터)
+/resource/
+
+# IDE - JetBrains
+/.idea/
+*.iml
+*.iws
+out/
+
+# IDE - VSCode
+/.vscode/
+
+# 가상환경
+/.venv/
+venv/
+env/
+
+# Python 바이트코드 / 캐시
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# 패키지 / 빌드 산출물
+build/
+dist/
+*.egg-info/
+.eggs/
+wheels/
+
+# 테스트 / 커버리지 / 캐시
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS 생성 파일
+.DS_Store
+Thumbs.db
