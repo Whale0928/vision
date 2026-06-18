@@ -1,0 +1,11 @@
+[general]
+# 본문 없는 한 줄 커밋 허용 (본문은 선택)
+ignore=body-is-missing
+
+[title-max-length]
+# 제목 50자 이내
+line-length=50
+
+[title-match-regex]
+# 형식: "타입: 메시지" (타입 = feat/fix/refactor/test/docs/chore/deps)
+regex=^(feat|fix|refactor|test|docs|chore|deps): .+

@@ -1,0 +1,6 @@
+# 커밋 메시지 컨벤션 검사 (commit-msg 단계, gitlint)
+repos:
+  - repo: https://github.com/jorisroovers/gitlint
+    rev: v0.19.1
+    hooks:
+      - id: gitlint
