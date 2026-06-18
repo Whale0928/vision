@@ -9,9 +9,15 @@
 <body>
   <header class="topbar">
     <div class="topbar-inner">
-      <span class="mark"></span>
-      <h1>위스키 라벨 분석</h1>
-      <span class="tag">whisky · vision · pilot</span>
+      <div class="brand-row">
+        <span class="mark"></span>
+        <h1>위스키 라벨 분석</h1>
+        <span class="tag">whisky · vision · pilot</span>
+      </div>
+      <nav class="page-tabs" aria-label="1차 카테고리">
+        <a class="page-tab active" href="/">위스키 라벨 분석</a>
+        <a class="page-tab" href="/image-preprocess">이미지 전처리</a>
+      </nav>
     </div>
   </header>
 
@@ -21,16 +27,18 @@
         <div class="card-head">입력</div>
         <div class="card-body">
           <form id="analyze-form">
-            <label class="dropzone" for="image-input">
-              <input id="image-input" name="image" type="file" accept="image/png,image/jpeg,image/webp" hidden />
-              <span class="ico">↑</span>
-              <span class="t">이미지를 끌어다 놓으세요</span>
-              <span class="h">PNG · JPEG · WEBP</span>
+            <label id="analysis-dropzone" class="dropzone" for="image-input">
+              <input id="image-input" name="image" type="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif,.heic,.heif" hidden />
+              <span class="replace-action" aria-label="이미지 교체" title="이미지 교체">↻</span>
+              <div id="analysis-upload-empty" class="upload-empty">
+                <span class="ico">↑</span>
+                <span class="t">이미지를 끌어다 놓으세요</span>
+                <span class="h">PNG · JPEG · WEBP · HEIC</span>
+              </div>
+              <div id="preview" class="preview hidden">
+                <img id="preview-image" alt="선택한 위스키" />
+              </div>
             </label>
-
-            <div id="preview" class="preview hidden">
-              <img id="preview-image" alt="선택한 위스키" />
-            </div>
 
             <div class="field">
               <label for="model-select">모델</label>
@@ -49,13 +57,13 @@
         <div class="card-head">단계별 상세 로그</div>
         <div class="card-body">
           <div class="debug-headline">
-            <div class="title">처리속도</div>
-            <div class="unit">milliseconds</div>
+            <div class="title">처리 흐름</div>
+            <div class="unit">초 (ms)</div>
           </div>
           <div id="debug-list" class="debug-list">
             <div class="empty">분석 전입니다.</div>
           </div>
-          <p class="debug-note">각 단계 완료 시 ms가 갱신되고, 느린 단계가 이 블록에서 바로 드러난다.</p>
+          <p class="debug-note">각 단계는 대기, 진행 중, 완료 상태로 바로 갱신된다.</p>
         </div>
       </section>
 

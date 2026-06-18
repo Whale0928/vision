@@ -31,11 +31,11 @@
     },
     "visible_text_raw": {
       "type": "string",
-      "description": "라벨에서 읽어낸 원문 텍스트 그대로. 보정 금지 — 보정/판단의 근거가 되는 ground truth"
+      "description": "선택한 병 라벨에서 읽어낸 원문 텍스트 그대로. 보정 금지. 줄바꿈과 읽히는 순서를 가능한 유지하고, 브랜드·증류소·제품명·연산·캐스크·도수·용량 등 식별 단서를 포함하는 ground truth"
     },
     "eng_name": {
       "type": ["string", "null"],
-      "description": "제품 영문명 (Alcohol.engName 대응). 라벨 기준, 표준 표기로 정규화. 미상이면 null"
+      "description": "제품 영문명 (Alcohol.engName 대응). 라벨에서 읽힌 이름 후보를 바탕으로 표준 영문 제품명으로 정규화. 단순 증류소명이 아니라 브랜드·증류소·제품명·연산·캐스크·에디션명을 반영한 가장 구체적인 제품명. 미상이면 null"
     },
     "kor_name": {
       "type": ["string", "null"],
@@ -77,11 +77,11 @@
     },
     "identification_reason": {
       "type": "string",
-      "description": "identification으로 그렇게 식별한 사유. 어떤 단서(라벨의 이름·색·캐스크 표기 등)로 판단했는지 서술. 사진에 병이 여러 개면 어떤 병에 집중했는지와 그 이유도 포함. identification보다 먼저 채워 근거를 쌓는다"
+      "description": "identification으로 그렇게 식별한 사유. 3~5문장 한글로 작성한다. 라벨에서 읽힌 이름 후보, 실제로 보인 핵심 단서(브랜드·증류소·제품명·연산·캐스크·도수·용량), 그 단서가 제품 식별로 이어진 이유, 불확실성이 있으면 무엇이 불확실한지를 포함한다. 사진에 병이 여러 개면 어떤 병에 집중했는지와 그 이유도 포함한다"
     },
     "identification": {
       "type": "string",
-      "description": "이 사진의 위스키가 무엇인지 식별 결론을 한 문장으로 (예: '이 위스키는 GlenAllachie 17 미즈나라 캐스크이다'). 식별 불가면 '식별 불가'와 그 취지"
+      "description": "이 사진의 위스키가 무엇인지 식별 결론을 한글 한 문장으로 작성한다. 라벨에서 읽은 브랜드·증류소·제품명 후보와 정규화한 제품명을 함께 담는다. 예: '라벨에서 THE GLENALLACHIE 10으로 읽히며, 표준 제품명은 The GlenAllachie 10 Year Old로 판단된다.' 식별 불가면 '식별 불가: ...' 형식으로 쓴다"
     },
     "description": {
       "type": "string",

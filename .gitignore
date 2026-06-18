@@ -5,6 +5,7 @@
 
 # 리소스 (대용량/개인 데이터)
 /resource/
+/.data/
 
 # IDE - JetBrains
 /.idea/

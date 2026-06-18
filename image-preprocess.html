@@ -1,0 +1,1364 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>이미지 전처리 샘플</title>
+<style>
+@font-face {
+  font-family: 'Pretendard Variable';
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+  src: url('/static/fonts/PretendardVariable.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'D2Coding';
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url('/static/fonts/D2Coding-Ver1.3.2-20180524.ttf') format('truetype');
+}
+
+:root {
+  --bg: #fbfbfa;
+  --surface: #f3f5f3;
+  --canvas: #eef1f0;
+  --grid: #e4e9e7;
+  --border: #dfe5e2;
+  --text-1: #26302e;
+  --text-2: #66716e;
+  --text-3: #9aa4a1;
+  --accent: #516860;
+  --accent-soft: rgba(81,104,96,0.09);
+  --accent-mid: rgba(81,104,96,0.18);
+  --warn: #8b6655;
+  --mono: 'D2Coding', 'SFMono-Regular', Consolas, monospace;
+  --sans: 'Pretendard Variable', system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  font-family: var(--sans);
+  color: var(--text-1);
+  background-color: var(--canvas);
+  background-image:
+    linear-gradient(0deg, transparent, transparent 39px, var(--grid) 39px),
+    linear-gradient(90deg, transparent, transparent 39px, var(--grid) 39px);
+  background-size: 40px 40px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+button { font-family: inherit; }
+
+.topbar {
+  background: rgba(251,251,250,0.96);
+  border-bottom: 1px solid var(--border);
+}
+
+.topbar-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 18px 32px 14px;
+}
+
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.mark {
+  width: 10px;
+  height: 26px;
+  background: var(--accent);
+  border-radius: 3px;
+}
+
+h1 {
+  font-size: 1.24rem;
+  font-weight: 760;
+  letter-spacing: 0;
+}
+
+.tag {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-3);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.page-tabs {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.page-tab {
+  display: inline-flex;
+  align-items: center;
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: 760;
+  font-size: 0.82rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.page-tab.active {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.page-tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.wrap {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 26px 32px 56px;
+}
+
+.tool-shell {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(251,251,250,0.62);
+  padding: 14px;
+}
+
+.bookmark-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.bookmark-tab {
+  position: relative;
+  top: 1px;
+  appearance: none;
+  border: 1px solid var(--border);
+  border-bottom-color: transparent;
+  background: var(--surface);
+  color: var(--text-2);
+  min-width: 128px;
+  padding: 12px 16px 11px;
+  border-radius: 12px 12px 0 0;
+  font-size: 0.84rem;
+  font-weight: 780;
+  cursor: pointer;
+}
+
+.bookmark-tab.active {
+  background: var(--bg);
+  color: var(--accent);
+  border-color: var(--border);
+  border-bottom-color: var(--bg);
+}
+
+.tab-panel {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 14px 14px;
+  min-height: 680px;
+  padding: 18px;
+}
+
+.tab-view[hidden] { display: none; }
+
+.layout-save {
+  display: grid;
+  grid-template-columns: 390px minmax(0, 1fr);
+  gap: 16px;
+}
+
+.layout-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 16px;
+}
+
+.panel {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 15px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-title {
+  font-size: 0.72rem;
+  font-weight: 820;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.panel-meta {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--text-3);
+}
+
+.panel-body { padding: 18px; }
+
+.dropzone {
+  display: block;
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  min-height: 254px;
+  overflow: hidden;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.dropzone.has-preview {
+  border-style: solid;
+  background: #fff;
+  text-align: left;
+}
+
+.upload-empty {
+  display: grid;
+  min-height: 254px;
+  place-content: center;
+  padding: 34px 16px;
+}
+
+.upload-empty[hidden] {
+  display: none;
+}
+
+.dropzone strong {
+  display: block;
+  font-size: 0.96rem;
+}
+
+.dropzone span {
+  display: block;
+  margin-top: 5px;
+  font: 700 0.68rem/1 var(--mono);
+  color: var(--text-3);
+}
+
+.upload-preview {
+  position: relative;
+  height: 300px;
+  background: #fff;
+}
+
+.upload-preview[hidden] {
+  display: none;
+}
+
+.upload-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.preview-copy {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(251,251,250,0.94);
+  box-shadow: 0 10px 24px rgba(38,48,46,0.08);
+}
+
+.preview-copy span {
+  text-align: left;
+}
+
+.replace-action {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+  display: none;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(251,251,250,0.94);
+  color: var(--accent);
+  font: 800 1rem/1 var(--mono);
+  box-shadow: 0 8px 18px rgba(38,48,46,0.10);
+}
+
+.dropzone.has-preview .replace-action {
+  display: inline-flex;
+}
+
+.action-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.btn {
+  border: none;
+  border-radius: 10px;
+  padding: 11px 12px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 780;
+  font-size: 0.86rem;
+  cursor: pointer;
+}
+
+.btn.secondary {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-mid);
+}
+
+.schema-note {
+  margin-top: 16px;
+  padding: 13px;
+  border-radius: 11px;
+  border: 1px solid rgba(139,102,85,0.25);
+  background: rgba(139,102,85,0.08);
+  color: var(--warn);
+  font-size: 0.78rem;
+}
+
+.step-log {
+  display: grid;
+  gap: 9px;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease, opacity 160ms ease;
+}
+
+.step.pending,
+.substep.pending {
+  opacity: 0.62;
+}
+
+.step.running {
+  border-color: var(--accent);
+  background: rgba(81,104,96,0.13);
+  box-shadow: inset 5px 0 0 var(--accent), 0 10px 24px rgba(38,48,46,0.10);
+  transform: translateX(4px);
+}
+
+.step.completed {
+  border-color: var(--accent-mid);
+  background: rgba(81,104,96,0.075);
+  box-shadow: inset 5px 0 0 rgba(81,104,96,0.36);
+}
+
+.step.preprocess {
+  align-items: start;
+}
+
+.step-name {
+  font-size: 0.84rem;
+  font-weight: 780;
+}
+
+.step.running .step-name::after,
+.substep.running .substep-name::after {
+  content: '진행 중';
+  display: inline-flex;
+  margin-left: 8px;
+  padding: 3px 7px;
+  border-radius: 99px;
+  background: var(--accent);
+  color: #fff;
+  font: 760 0.6rem/1 var(--mono);
+  vertical-align: 1px;
+}
+
+.step.completed .step-name::after,
+.substep.completed .substep-name::after {
+  content: '완료';
+  display: inline-flex;
+  margin-left: 8px;
+  padding: 3px 7px;
+  border-radius: 99px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font: 760 0.6rem/1 var(--mono);
+  vertical-align: 1px;
+}
+
+.step-note {
+  margin-top: 2px;
+  font-size: 0.72rem;
+  color: var(--text-3);
+}
+
+.step-time {
+  font: 800 0.76rem/1 var(--mono);
+  color: var(--accent);
+}
+
+.substep-list {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 7px;
+  margin-top: 2px;
+  padding-left: 16px;
+  border-left: 1px solid var(--accent-mid);
+}
+
+.substep {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: rgba(251,251,250,0.72);
+  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease, opacity 160ms ease;
+}
+
+.substep.running {
+  border-color: var(--accent);
+  background: rgba(81,104,96,0.10);
+  box-shadow: inset 4px 0 0 var(--accent);
+  transform: translateX(3px);
+}
+
+.substep.completed {
+  border-color: var(--accent-mid);
+  background: rgba(81,104,96,0.055);
+  box-shadow: inset 4px 0 0 rgba(81,104,96,0.30);
+}
+
+.substep-name {
+  font-size: 0.78rem;
+  font-weight: 740;
+}
+
+.substep-name::before {
+  content: 'ㄴ ';
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.substep-note {
+  margin-top: 2px;
+  font-size: 0.68rem;
+  color: var(--text-3);
+}
+
+.substep-time {
+  font: 760 0.72rem/1 var(--mono);
+  color: var(--accent);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.meta-cell {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  padding: 10px 12px;
+}
+
+.meta-cell .k {
+  font: 700 0.62rem/1 var(--mono);
+  color: var(--text-3);
+  text-transform: uppercase;
+}
+
+.meta-cell .v {
+  margin-top: 6px;
+  font-size: 0.86rem;
+  font-weight: 740;
+  word-break: break-all;
+}
+
+.stored-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.stored-card {
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--surface);
+  padding: 11px;
+  cursor: pointer;
+}
+
+.stored-card.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.stored-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.thumb {
+  position: relative;
+  height: 148px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, rgba(251,251,250,0.95), rgba(219,226,222,0.85)),
+    linear-gradient(90deg, transparent 20%, rgba(81,104,96,0.16) 20% 26%, transparent 26% 74%, rgba(81,104,96,0.16) 74% 80%, transparent 80%);
+  overflow: hidden;
+}
+
+.thumb::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 18px;
+  width: 42px;
+  height: 105px;
+  transform: translateX(-50%);
+  border-radius: 19px 19px 9px 9px;
+  background: linear-gradient(180deg, #64776f, #34433f);
+  box-shadow: 0 38px 0 -18px rgba(251,251,250,0.72) inset;
+}
+
+.thumb.has-image::after {
+  display: none;
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #fff;
+}
+
+.stored-name {
+  margin-top: 10px;
+  font-size: 0.84rem;
+  font-weight: 760;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stored-sub {
+  margin-top: 3px;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  color: var(--text-3);
+}
+
+.stored-state {
+  display: inline-flex;
+  margin-top: 8px;
+  padding: 3px 8px;
+  border-radius: 99px;
+  background: rgba(81,104,96,0.12);
+  color: var(--accent);
+  font: 700 0.64rem/1 var(--mono);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.image-frame {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 12px;
+}
+
+.image-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font: 700 0.68rem/1 var(--mono);
+  color: var(--text-3);
+  text-transform: uppercase;
+}
+
+.mock-image {
+  position: relative;
+  height: 430px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, rgba(251,251,250,0.98), rgba(238,241,240,0.92)),
+    repeating-linear-gradient(0deg, transparent 0 38px, rgba(81,104,96,0.05) 38px 40px);
+}
+
+.mock-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.mock-image.original {
+  background:
+    linear-gradient(135deg, rgba(219,226,222,0.85), rgba(251,251,250,0.96)),
+    repeating-linear-gradient(90deg, transparent 0 46px, rgba(152,96,91,0.05) 46px 48px);
+}
+
+.bottle {
+  position: absolute;
+  left: 50%;
+  top: 38px;
+  width: 98px;
+  height: 310px;
+  transform: translateX(-50%);
+  border-radius: 36px 36px 18px 18px;
+  background: linear-gradient(180deg, #60766e, #2f3e3a);
+  box-shadow: 0 0 0 1px rgba(38,48,46,0.12), 0 24px 50px rgba(38,48,46,0.14);
+}
+
+.bottle::before {
+  content: '';
+  position: absolute;
+  left: 34px;
+  top: -42px;
+  width: 30px;
+  height: 58px;
+  border-radius: 10px 10px 2px 2px;
+  background: #35443f;
+}
+
+.label {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 112px;
+  height: 118px;
+  border-radius: 7px;
+  background: #f7f5ee;
+  border: 1px solid rgba(38,48,46,0.18);
+}
+
+.label::before {
+  content: 'SAMPLE LABEL';
+  position: absolute;
+  left: 9px;
+  right: 9px;
+  top: 24px;
+  font: 700 0.62rem/1 var(--mono);
+  text-align: center;
+  color: #516860;
+  letter-spacing: 1px;
+}
+
+.label::after {
+  content: '';
+  position: absolute;
+  left: 15px;
+  right: 15px;
+  bottom: 28px;
+  height: 7px;
+  background: linear-gradient(90deg, #cfc9bd 30%, transparent 30% 38%, #cfc9bd 38% 68%, transparent 68% 76%, #cfc9bd 76%);
+  box-shadow: 0 14px 0 #d9d4ca;
+}
+
+.result-box {
+  margin-top: 14px;
+  border: 1px solid var(--accent-mid);
+  border-radius: 12px;
+  background: var(--accent-soft);
+  padding: 14px;
+}
+
+.result-box .headline {
+  font-size: 0.95rem;
+  font-weight: 780;
+}
+
+.result-box .desc {
+  margin-top: 7px;
+  font-size: 0.84rem;
+  color: var(--text-2);
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 22px;
+  color: var(--text-2);
+  font-size: 0.84rem;
+  text-align: center;
+}
+
+@media (max-width: 1120px) {
+  .layout-save, .layout-detail { grid-template-columns: 1fr; }
+  .stored-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 780px) {
+  .topbar-inner, .wrap { padding-left: 16px; padding-right: 16px; }
+  .brand-row { align-items: flex-start; }
+  .tag { display: none; }
+  .page-tabs, .bookmark-tabs { overflow-x: auto; }
+  .bookmark-tab { min-width: 116px; }
+  .stored-grid, .detail-grid, .summary-grid { grid-template-columns: 1fr; }
+  .mock-image { height: 360px; }
+}
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-row">
+        <span class="mark"></span>
+        <h1>위스키 라벨 분석</h1>
+        <span class="tag">whisky · vision · pilot</span>
+      </div>
+      <nav class="page-tabs" aria-label="1차 카테고리">
+        <a class="page-tab" href="/">위스키 라벨 분석</a>
+        <a class="page-tab active" href="/image-preprocess">이미지 전처리</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="tool-shell" aria-label="이미지 전처리 샘플">
+      <nav class="bookmark-tabs" aria-label="이미지 전처리 책갈피">
+        <button class="bookmark-tab active" type="button" data-tab="save">이미지 저장</button>
+        <button class="bookmark-tab" type="button" data-tab="list">저장 목록</button>
+        <button class="bookmark-tab" type="button" data-tab="detail">이미지 상세</button>
+      </nav>
+
+      <div class="tab-panel">
+        <section id="tab-save" class="tab-view">
+          <div class="layout-save">
+            <section class="panel">
+              <div class="panel-head">
+                <div class="panel-title">이미지 저장</div>
+                <div class="panel-meta">upload</div>
+              </div>
+              <div class="panel-body">
+                <label id="dropzone" class="dropzone">
+                  <input id="file-input" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" hidden />
+                  <span class="replace-action" aria-label="이미지 교체" title="이미지 교체">↻</span>
+                  <div id="upload-empty" class="upload-empty">
+                    <strong>이미지 선택</strong>
+                    <span>JPEG · PNG · WEBP · HEIC</span>
+                  </div>
+                  <div id="upload-preview" class="upload-preview" hidden>
+                    <img id="preview-image" alt="선택 이미지 미리보기" />
+                    <div class="preview-copy">
+                      <strong>이미지 선택됨</strong>
+                      <span id="selected-file-name">JPEG · PNG · WEBP · HEIC</span>
+                    </div>
+                  </div>
+                </label>
+
+                <div class="action-row">
+                  <button id="run-sample" class="btn" type="button">저장 실행</button>
+                </div>
+
+                <div class="summary-grid">
+                  <div class="meta-cell">
+                    <div class="k">file_id</div>
+                    <div id="summary-file-id" class="v">-</div>
+                  </div>
+                  <div class="meta-cell">
+                    <div class="k">status</div>
+                    <div id="summary-status" class="v">-</div>
+                  </div>
+                  <div class="meta-cell">
+                    <div class="k">profile</div>
+                    <div id="summary-profile" class="v">-</div>
+                  </div>
+                </div>
+
+                <div class="schema-note">이 화면은 이미지 전처리 확인용입니다. 위스키 분석 API는 호출하지 않습니다.</div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <div class="panel-title">단계별 저장 로그</div>
+                <div class="panel-meta">초 (ms)</div>
+              </div>
+              <div class="panel-body">
+                <div id="step-log" class="step-log">
+                  <div class="step pending">
+                    <div>
+                      <div class="step-name">원본 해시 계산</div>
+                      <div class="step-note">original_sha256 중복 확인</div>
+                    </div>
+                    <div class="step-time">대기</div>
+                  </div>
+                  <div class="step pending">
+                    <div>
+                      <div class="step-name">원본 저장</div>
+                      <div class="step-note">objects/files/original</div>
+                    </div>
+                    <div class="step-time">대기</div>
+                  </div>
+                  <div class="step pending preprocess">
+                    <div>
+                      <div class="step-name">이미지 보정</div>
+                      <div class="step-note">1024x1365, sRGB, EXIF 제거</div>
+                    </div>
+                    <div class="step-time">대기</div>
+                    <div class="substep-list">
+                      <div class="substep pending">
+                        <div>
+                          <div class="substep-name">사이즈 보정</div>
+                          <div class="substep-note">contain + padding, 1024x1365 캔버스</div>
+                        </div>
+                        <div class="substep-time">대기</div>
+                      </div>
+                      <div class="substep pending">
+                        <div>
+                          <div class="substep-name">sRGB 변환</div>
+                          <div class="substep-note">RGB 색공간 통일, 투명 배경 흰색 합성</div>
+                        </div>
+                        <div class="substep-time">대기</div>
+                      </div>
+                      <div class="substep pending">
+                        <div>
+                          <div class="substep-name">EXIF 제거</div>
+                          <div class="substep-note">촬영 기기, 위치 등 개인정보 메타데이터 제거</div>
+                        </div>
+                        <div class="substep-time">대기</div>
+                      </div>
+                      <div class="substep pending">
+                        <div>
+                          <div class="substep-name">JPEG 인코딩</div>
+                          <div class="substep-note">quality 90, progressive off, 모델 입력용 bytes 생성</div>
+                        </div>
+                        <div class="substep-time">대기</div>
+                      </div>
+                      <div class="substep pending">
+                        <div>
+                          <div class="substep-name">썸네일 생성</div>
+                          <div class="substep-note">320x426 목록 미리보기 이미지 생성</div>
+                        </div>
+                        <div class="substep-time">대기</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="step pending">
+                    <div>
+                      <div class="step-name">보정 이미지 저장</div>
+                      <div class="step-note">processed + thumbnail</div>
+                    </div>
+                    <div class="step-time">대기</div>
+                  </div>
+                  <div class="step pending">
+                    <div>
+                      <div class="step-name">DB files 갱신</div>
+                      <div class="step-note">status=processed_saved</div>
+                    </div>
+                    <div class="step-time">대기</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section id="tab-list" class="tab-view" hidden>
+          <section class="panel">
+            <div class="panel-head">
+              <div class="panel-title">저장 목록</div>
+              <div class="panel-meta">thumbnail grid</div>
+            </div>
+            <div class="panel-body">
+              <div id="stored-grid" class="stored-grid">
+                <div class="empty-state">저장된 이미지가 없습니다.</div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section id="tab-detail" class="tab-view" hidden>
+          <div class="layout-detail">
+            <section class="panel">
+              <div class="panel-head">
+                <div class="panel-title">이미지 상세</div>
+                <div class="panel-meta">original / processed</div>
+              </div>
+              <div class="panel-body">
+                <div class="detail-grid">
+                  <div class="image-frame">
+                    <div class="image-label">
+                      <span>원본</span>
+                      <span id="original-image-meta">-</span>
+                    </div>
+                    <div id="original-image-box" class="mock-image original">
+                      <div class="bottle"><div class="label"></div></div>
+                    </div>
+                  </div>
+                  <div class="image-frame">
+                    <div class="image-label">
+                      <span>보정 이미지</span>
+                      <span id="processed-image-meta">-</span>
+                    </div>
+                    <div id="processed-image-box" class="mock-image">
+                      <div class="bottle"><div class="label"></div></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="result-box">
+                  <div class="headline">처리 결과</div>
+                  <div id="detail-result-desc" class="desc">저장 목록에서 이미지를 선택하면 처리 결과가 표시됩니다.</div>
+                </div>
+              </div>
+            </section>
+
+            <aside class="panel">
+              <div class="panel-head">
+                <div class="panel-title">파일 메타데이터</div>
+                <div class="panel-meta">files row</div>
+              </div>
+              <div class="panel-body">
+                <div class="summary-grid" style="grid-template-columns: 1fr;">
+                  <div class="meta-cell">
+                    <div class="k">file_id</div>
+                    <div id="detail-file-id" class="v">-</div>
+                  </div>
+                  <div class="meta-cell">
+                    <div class="k">original_sha256</div>
+                    <div id="detail-original-sha" class="v">-</div>
+                  </div>
+                  <div class="meta-cell">
+                    <div class="k">processed_sha256</div>
+                    <div id="detail-processed-sha" class="v">-</div>
+                  </div>
+                  <div class="meta-cell">
+                    <div class="k">thumbnail</div>
+                    <div id="detail-thumbnail" class="v">-</div>
+                  </div>
+                  <div class="meta-cell">
+                    <div class="k">saved_at</div>
+                    <div id="detail-saved-at" class="v">-</div>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+<script>
+const tabs = Array.from(document.querySelectorAll('.bookmark-tab'));
+const views = {
+  save: document.querySelector('#tab-save'),
+  list: document.querySelector('#tab-list'),
+  detail: document.querySelector('#tab-detail'),
+};
+const runButton = document.querySelector('#run-sample');
+const dropzone = document.querySelector('#dropzone');
+const fileInput = document.querySelector('#file-input');
+const uploadEmpty = document.querySelector('#upload-empty');
+const uploadPreview = document.querySelector('#upload-preview');
+const previewImage = document.querySelector('#preview-image');
+const selectedFileName = document.querySelector('#selected-file-name');
+const stepLog = document.querySelector('#step-log');
+const storedGrid = document.querySelector('#stored-grid');
+const summaryFileId = document.querySelector('#summary-file-id');
+const summaryStatus = document.querySelector('#summary-status');
+const summaryProfile = document.querySelector('#summary-profile');
+const originalImageMeta = document.querySelector('#original-image-meta');
+const processedImageMeta = document.querySelector('#processed-image-meta');
+const originalImageBox = document.querySelector('#original-image-box');
+const processedImageBox = document.querySelector('#processed-image-box');
+const detailResultDesc = document.querySelector('#detail-result-desc');
+const detailFileId = document.querySelector('#detail-file-id');
+const detailOriginalSha = document.querySelector('#detail-original-sha');
+const detailProcessedSha = document.querySelector('#detail-processed-sha');
+const detailThumbnail = document.querySelector('#detail-thumbnail');
+const detailSavedAt = document.querySelector('#detail-saved-at');
+
+let activeFileId = null;
+let previewUrl = null;
+let progressTimer = null;
+
+const PROGRESS_INTERVAL_MS = 200;
+const DEFAULT_STEPS = [
+  { label: '원본 해시 계산', children: [] },
+  { label: '원본 저장', children: [] },
+  {
+    label: '이미지 보정',
+    children: [
+      { label: '사이즈 보정', children: [] },
+      { label: 'sRGB 변환', children: [] },
+      { label: 'EXIF 제거', children: [] },
+      { label: 'JPEG 인코딩', children: [] },
+      { label: '썸네일 생성', children: [] },
+    ],
+  },
+  { label: '보정 이미지 저장', children: [] },
+  { label: 'DB files 갱신', children: [] },
+];
+
+function formatDuration(ms) {
+  const numericMs = Number(ms);
+  if (!Number.isFinite(numericMs)) return '-';
+  const roundedMs = Math.max(0, Math.round(numericMs));
+  return `${(roundedMs / 1000).toFixed(1)}초 (${roundedMs}ms)`;
+}
+
+function progressTimeLabel(state) {
+  if (state === 'running') return '진행 중';
+  if (state === 'completed') return '완료';
+  return '대기';
+}
+
+function selectTab(name) {
+  tabs.forEach((tab) => tab.classList.toggle('active', tab.dataset.tab === name));
+  Object.entries(views).forEach(([key, view]) => {
+    view.hidden = key !== name;
+  });
+}
+
+tabs.forEach((tab) => {
+  tab.addEventListener('click', () => selectTab(tab.dataset.tab));
+});
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (match) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[match]));
+}
+
+function stepNote(label) {
+  return {
+    '원본 해시 계산': 'original_sha256 중복 확인',
+    '중복 이미지 확인': '동일 original_sha256 캐시 사용',
+    '원본 저장': 'objects/files/original',
+    '이미지 보정': '1024x1365, sRGB, EXIF 제거',
+    '보정 이미지 저장': 'processed + thumbnail',
+    'DB files 갱신': 'status=processed_saved',
+    '사이즈 보정': 'contain + padding, 1024x1365 캔버스',
+    'sRGB 변환': 'RGB 색공간 통일, 투명 배경 흰색 합성',
+    'EXIF 제거': '개인정보 메타데이터 제거',
+    'JPEG 인코딩': 'quality 90, 모델 입력용 bytes 생성',
+    '썸네일 생성': '320x426 목록 미리보기 이미지 생성',
+  }[label] || '';
+}
+
+function renderSteps(steps) {
+  if (!steps.length) {
+    stepLog.innerHTML = '<div class="empty-state">처리 로그가 없습니다.</div>';
+    return;
+  }
+
+  stepLog.innerHTML = steps.map((step) => {
+    const children = step.children || [];
+    const childMarkup = children.length
+      ? `<div class="substep-list">${children.map((child) => `
+          <div class="substep completed">
+            <div>
+              <div class="substep-name">${escapeHtml(child.label)}</div>
+              <div class="substep-note">${escapeHtml(stepNote(child.label))}</div>
+            </div>
+            <div class="substep-time">${escapeHtml(formatDuration(child.elapsed_ms))}</div>
+          </div>`).join('')}</div>`
+      : '';
+
+    return `
+      <div class="step completed${children.length ? ' preprocess' : ''}">
+        <div>
+          <div class="step-name">${escapeHtml(step.label)}</div>
+          <div class="step-note">${escapeHtml(stepNote(step.label))}</div>
+        </div>
+        <div class="step-time">${escapeHtml(formatDuration(step.elapsed_ms))}</div>
+        ${childMarkup}
+      </div>`;
+  }).join('');
+}
+
+function flattenSteps(steps) {
+  const flattened = [];
+  steps.forEach((step, stepIndex) => {
+    flattened.push({ stepIndex, childIndex: null });
+    (step.children || []).forEach((child, childIndex) => {
+      flattened.push({ stepIndex, childIndex });
+    });
+  });
+  return flattened;
+}
+
+function sequenceIndexFor(sequence, stepIndex, childIndex) {
+  return sequence.findIndex((item) => item.stepIndex === stepIndex && item.childIndex === childIndex);
+}
+
+function renderProgressSteps(activeSequenceIndex) {
+  const sequence = flattenSteps(DEFAULT_STEPS);
+  stepLog.innerHTML = DEFAULT_STEPS.map((step, stepIndex) => {
+    const children = step.children || [];
+    const parentSequenceIndex = sequenceIndexFor(sequence, stepIndex, null);
+    const childActive = sequence[activeSequenceIndex]?.stepIndex === stepIndex && sequence[activeSequenceIndex]?.childIndex !== null;
+    const parentClass = activeSequenceIndex === parentSequenceIndex || childActive
+      ? 'running'
+      : activeSequenceIndex > parentSequenceIndex ? 'completed' : 'pending';
+    const childMarkup = children.length
+      ? `<div class="substep-list">${children.map((child, childIndex) => {
+          const currentChildSequenceIndex = sequenceIndexFor(sequence, stepIndex, childIndex);
+          const childClass = activeSequenceIndex === currentChildSequenceIndex
+            ? 'running'
+            : activeSequenceIndex > currentChildSequenceIndex ? 'completed' : 'pending';
+          return `
+            <div class="substep ${childClass}">
+              <div>
+                <div class="substep-name">${escapeHtml(child.label)}</div>
+                <div class="substep-note">${escapeHtml(stepNote(child.label))}</div>
+              </div>
+              <div class="substep-time">${escapeHtml(progressTimeLabel(childClass))}</div>
+            </div>`;
+        }).join('')}</div>`
+      : '';
+
+    return `
+      <div class="step ${parentClass}${children.length ? ' preprocess' : ''}">
+        <div>
+          <div class="step-name">${escapeHtml(step.label)}</div>
+          <div class="step-note">${escapeHtml(stepNote(step.label))}</div>
+        </div>
+        <div class="step-time">${escapeHtml(progressTimeLabel(parentClass))}</div>
+        ${childMarkup}
+      </div>`;
+  }).join('');
+}
+
+function playProgressFlow() {
+  window.clearInterval(progressTimer);
+  const sequence = flattenSteps(DEFAULT_STEPS);
+  let activeSequenceIndex = 0;
+  renderProgressSteps(activeSequenceIndex);
+
+  return new Promise((resolve) => {
+    progressTimer = window.setInterval(() => {
+      activeSequenceIndex += 1;
+      if (activeSequenceIndex >= sequence.length) {
+        window.clearInterval(progressTimer);
+        progressTimer = null;
+        resolve();
+        return;
+      }
+      renderProgressSteps(activeSequenceIndex);
+    }, PROGRESS_INTERVAL_MS);
+  });
+}
+
+function renderError(message) {
+  window.clearInterval(progressTimer);
+  progressTimer = null;
+  stepLog.innerHTML = `
+    <div class="step running">
+      <div>
+        <div class="step-name">처리 실패</div>
+        <div class="step-note">${escapeHtml(message)}</div>
+      </div>
+      <div class="step-time">실패</div>
+    </div>`;
+}
+
+function bytesLabel(bytes) {
+  if (bytes >= 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(2)}MB`;
+  if (bytes >= 1024) return `${(bytes / 1024).toFixed(1)}KB`;
+  return `${bytes}B`;
+}
+
+function imageVersion(url) {
+  return `${url}?v=${Date.now()}`;
+}
+
+function renderImageBox(box, url, alt) {
+  box.innerHTML = `<img src="${escapeHtml(imageVersion(url))}" alt="${escapeHtml(alt)}" />`;
+}
+
+function renderList(items) {
+  if (!items.length) {
+    storedGrid.innerHTML = '<div class="empty-state">저장된 이미지가 없습니다.</div>';
+    return;
+  }
+
+  storedGrid.innerHTML = items.map((item) => `
+    <article class="stored-card${item.file_id === activeFileId ? ' active' : ''}" tabindex="0" data-file-id="${escapeHtml(item.file_id)}">
+      <div class="thumb has-image">
+        <img src="${escapeHtml(imageVersion(item.thumbnail_url))}" alt="${escapeHtml(item.original_filename || item.file_id)} 썸네일" />
+      </div>
+      <div class="stored-name">${escapeHtml(item.original_filename || item.file_id)}</div>
+      <div class="stored-sub">${escapeHtml(item.file_id)} · ${item.processed_width}x${item.processed_height}</div>
+      <span class="stored-state">${escapeHtml(item.status)}</span>
+    </article>`).join('');
+
+  storedGrid.querySelectorAll('.stored-card').forEach((card) => {
+    const openDetail = () => showDetail(card.dataset.fileId);
+    card.addEventListener('click', openDetail);
+    card.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openDetail();
+      }
+    });
+  });
+}
+
+async function loadFileList() {
+  const response = await fetch('/api/files');
+  if (!response.ok) {
+    throw new Error(`저장 목록 조회 실패: ${response.status}`);
+  }
+  const payload = await response.json();
+  renderList(payload.items || []);
+}
+
+async function showDetail(fileId) {
+  const response = await fetch(`/api/files/${encodeURIComponent(fileId)}`);
+  if (!response.ok) {
+    throw new Error(`이미지 상세 조회 실패: ${response.status}`);
+  }
+  const detail = await response.json();
+  activeFileId = detail.file_id;
+
+  renderImageBox(originalImageBox, detail.original_url, '원본 이미지');
+  renderImageBox(processedImageBox, detail.processed_url, '보정 이미지');
+  originalImageMeta.textContent = `${detail.source.width}x${detail.source.height} · ${bytesLabel(detail.source.size_bytes)}`;
+  processedImageMeta.textContent = `${detail.processed.width}x${detail.processed.height} · ${bytesLabel(detail.processed.size_bytes)}`;
+  detailResultDesc.textContent = `${detail.original_filename || detail.file_id} 저장 완료. 원본과 보정 이미지를 같은 파일 row에서 확인 중입니다.`;
+  detailFileId.textContent = detail.file_id;
+  detailOriginalSha.textContent = detail.original_sha256;
+  detailProcessedSha.textContent = detail.processed_sha256;
+  detailThumbnail.textContent = detail.thumbnail_url;
+  detailSavedAt.textContent = detail.created_at;
+  summaryFileId.textContent = detail.file_id;
+  summaryStatus.textContent = detail.status;
+  summaryProfile.textContent = detail.processed.profile;
+
+  await loadFileList();
+  selectTab('detail');
+}
+
+fileInput.addEventListener('change', () => {
+  const file = fileInput.files[0];
+  if (previewUrl) {
+    URL.revokeObjectURL(previewUrl);
+    previewUrl = null;
+  }
+
+  if (!file) {
+    dropzone.classList.remove('has-preview');
+    uploadEmpty.hidden = false;
+    uploadPreview.hidden = true;
+    selectedFileName.textContent = 'JPEG · PNG · WEBP · HEIC';
+    previewImage.removeAttribute('src');
+    return;
+  }
+
+  previewUrl = URL.createObjectURL(file);
+  previewImage.src = previewUrl;
+  selectedFileName.textContent = file.name;
+  uploadEmpty.hidden = true;
+  uploadPreview.hidden = false;
+  dropzone.classList.add('has-preview');
+});
+
+runButton.addEventListener('click', async () => {
+  const file = fileInput.files[0];
+  if (!file) {
+    renderError('이미지를 먼저 선택하세요.');
+    return;
+  }
+
+  runButton.disabled = true;
+  runButton.textContent = '저장 중...';
+
+  try {
+    const formData = new FormData();
+    formData.append('image', file);
+    const progress = playProgressFlow();
+    const request = fetch('/api/files', {
+      method: 'POST',
+      body: formData,
+    });
+    const [response] = await Promise.all([request, progress]);
+    const payload = await response.json();
+    if (!response.ok) {
+      throw new Error(payload.detail || `이미지 저장 실패: ${response.status}`);
+    }
+
+    activeFileId = payload.file_id;
+    renderSteps(payload.steps || []);
+    summaryFileId.textContent = payload.file_id;
+    summaryStatus.textContent = payload.duplicate ? `${payload.status} · duplicate` : payload.status;
+    summaryProfile.textContent = 'jpeg_1024x1365_q90';
+    await loadFileList();
+    selectTab('save');
+  } catch (error) {
+    renderError(error.message || '이미지 저장에 실패했습니다.');
+  } finally {
+    runButton.disabled = false;
+    runButton.textContent = '저장 실행';
+  }
+});
+
+renderProgressSteps(-1);
+loadFileList().catch((error) => renderError(error.message || '저장 목록 조회에 실패했습니다.'));
+</script>
+</body>
+</html>
