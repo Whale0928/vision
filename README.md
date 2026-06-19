@@ -50,6 +50,27 @@ http://127.0.0.1:8080/image-preprocess
 uv run uvicorn app.main:app --host 127.0.0.1 --port 8080 --reload
 ```
 
+## Docker 실행
+
+이미지는 코드와 의존성만 포함하고, API 키와 저장 경로는 실행 시 `.env`로 주입합니다.
+
+```bash
+cp .env.example .env
+```
+
+`.env`에서 `GPT_API_KEY`를 실제 키로 바꾸고, 컨테이너에서는 저장소를 `/data`로 사용합니다.
+
+```bash
+docker build -t whisky-vision-pilot .
+docker run --rm \
+  --env-file .env \
+  -p 8080:8080 \
+  -v "$(pwd)/.data:/data" \
+  whisky-vision-pilot
+```
+
+브라우저에서 `http://127.0.0.1:8080`으로 접속합니다.
+
 ## API
 
 ### `POST /api/analyze`
