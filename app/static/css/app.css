@@ -71,15 +71,35 @@ body {
   letter-spacing: 3px; text-transform: uppercase; color: var(--text-3);
 }
 .page-tabs {
-  display: flex; gap: 8px; margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 16px; padding-top: 0;
+}
+.page-tabs::before {
+  content: "대시보드";
+  flex: 0 0 100%;
+  height: 20px;
+  line-height: 20px;
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-3);
+  background-image: linear-gradient(var(--border), var(--border));
+  background-repeat: no-repeat;
+  background-position: 76px 50%;
+  background-size: calc(100% - 76px) 1px;
 }
 .page-tab {
-  display: inline-flex; align-items: center; appearance: none; border: 1px solid var(--border);
-  background: var(--surface); color: var(--text-2); border-radius: 10px; padding: 8px 12px;
+  display: inline-flex; align-items: center; appearance: none; border: 0;
+  background: transparent; color: var(--text-2); border-radius: 8px; padding: 7px 10px;
   font-weight: 760; font-size: 0.82rem; text-decoration: none; cursor: pointer;
+  transition: background-color .14s ease, color .14s ease, box-shadow .14s ease;
 }
 .page-tab.active {
-  color: #fff; background: var(--accent); border-color: var(--accent);
+  color: var(--accent); background: var(--accent-light); box-shadow: inset 0 -2px 0 var(--accent);
+}
+.page-tab:hover {
+  color: var(--accent); background: rgba(81,104,96,0.055);
 }
 .page-tab:focus-visible {
   outline: 2px solid var(--accent); outline-offset: 2px;
